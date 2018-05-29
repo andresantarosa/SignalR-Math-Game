@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-
+//--------------------------------------------
+using SignalRMathGame.Interfaces;
+using SignalRMathGame.Model;
+using SignalRMathGame.Logic;
 namespace SignalRMathGame
 {
     public class Startup
@@ -16,7 +19,8 @@ namespace SignalRMathGame
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
-        }
+            services.AddTransient<IMathProblem, MathProblem>();
+        }        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
