@@ -18,8 +18,9 @@ namespace SignalRMathGame
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalR();
-            services.AddTransient<IMathProblem, MathProblem>();
+            services.AddSignalR(x=>x.EnableDetailedErrors = true);
+            services.AddSingleton<IMathProblem, MathProblem>();
+            services.AddTransient<IScore, Score>();
         }        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -30,12 +31,8 @@ namespace SignalRMathGame
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseSignalR(routes => routes.MapHub<MathGame>("/game"));
-
-            app.Run(async (context) =>
-            {
-                await context.Response.WriteAsync("Hello World!");
-            });
+            app.UseSignalR(routes => routes.MapHub<MathGame>("/MathGame"));
+            app.UseStaticFiles();
         }
     }
 }

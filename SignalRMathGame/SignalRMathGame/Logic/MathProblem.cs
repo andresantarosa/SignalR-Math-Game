@@ -11,6 +11,18 @@ namespace SignalRMathGame.Logic
 {
     public class MathProblem : MathProblemModel, IMathProblem
     {
+
+        private MathProblem _mathProblem { get; set; }
+
+        public MathProblem()
+        {
+            _mathProblem = CreateProblem();
+        }
+
+        public MathProblem GetMathProblem()
+        {
+            return _mathProblem;
+        }
         public MathProblem CreateProblem()
         {
             this.number1 = Randomize.GenerateRandomNumber();

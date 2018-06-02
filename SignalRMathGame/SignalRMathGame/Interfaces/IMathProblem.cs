@@ -16,5 +16,7 @@ namespace SignalRMathGame.Interfaces
         string GetSymbol(OperationsEnum operation);
 
         float GetResult(OperationsEnum operation, int number1, int number2, bool matchResult);
+
+        MathProblem GetMathProblem();
     }
 }

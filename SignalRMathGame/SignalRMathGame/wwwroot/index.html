@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <input type="button" id="btn" value="Enviar" />
+    <input type="button" id="refresh" value="Refresh" />
+    <script src="signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/MathGame")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        connection.on("receiveMessage", data => {
+            console.log(data);
+        });
+
+        document.getElementById('btn').addEventListener("click", evt => {
+            connection.invoke("receiveMessage", "teste");
+
+        })
+
+        document.getElementById('refresh').addEventListener("click", evt => {
+            connection.invoke("refreshChallenge");
+
+        })
+
+        connection.start().then(() => {
+            console.log("Started connection");
+        }).catch((err) => {
+            console.error(err.toString())
+        });
+
+    </script>
+
+
+
+</body>
+</html>

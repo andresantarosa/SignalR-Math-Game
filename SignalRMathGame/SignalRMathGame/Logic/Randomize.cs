@@ -25,7 +25,7 @@ namespace SignalRMathGame.Logic
         public static bool GenerateRandomBoolean()
         {
             Random rnd = new Random();
-            return rnd.Next(0, 1) == 0;
+            return rnd.Next(1,1000) > 500 ? true: false;
         }
     }
 }
