@@ -7,7 +7,10 @@ namespace SignalRMathGame.Model
 {
     public class ScoreModel
     {
-        public string playerName { get; set; }
-        public int score { get; set; }
+        public List<ScoreItemModel> score;
+        public ScoreModel()
+        {
+            score = new List<ScoreItemModel>();
+        }
     }
 }

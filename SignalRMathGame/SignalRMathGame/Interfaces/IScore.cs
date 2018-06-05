@@ -9,14 +9,14 @@ namespace SignalRMathGame.Interfaces
 {
     public interface IScore
     {
-        List<ScoreModel> GetScore();
+        List<ScoreItemModel> GetScore();
 
-        List<ScoreModel> AddPlayer(string playerName);
+        List<ScoreItemModel> AddPlayer(string playerName);
 
-        List<ScoreModel> AddPoint(string playerName);
+        List<ScoreItemModel> AddPoint(string playerName);
 
-        List<ScoreModel> RemovePoint(string playerName);
+        List<ScoreItemModel> RemovePoint(string playerName);
 
-        List<ScoreModel> RemovePlayer(string playerName);
+        List<ScoreItemModel> RemovePlayer(string playerName);
     }
 }

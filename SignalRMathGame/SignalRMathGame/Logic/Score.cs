@@ -5,53 +5,70 @@ using System.Threading.Tasks;
 //--------------------------
 using SignalRMathGame.Model;
 using SignalRMathGame.Interfaces;
+using SignalRMathGame.Exceptions;
 
 namespace SignalRMathGame.Logic
 {
-    public class Score:IScore
+    public class Score : IScore
     {
-        private List<ScoreModel> _score;
-
-        public Score()
+        private ScoreModel _score;
+        private ScoreItemModel _scoreItemModel;
+        public Score(ScoreModel score, ScoreItemModel scoreItemModel)
         {
-            _score = new List<ScoreModel>();
-            _score.Add(new ScoreModel
+            _score = score;
+            _scoreItemModel = scoreItemModel;
+        }
+
+        public List<ScoreItemModel> GetScore()
+        {
+            return _score.score;
+        }
+
+        public List<ScoreItemModel> AddPlayer(string playerName)
+        {
+            try
             {
-                playerName = "aa",
-                score = 1
-            });
+                if (_score.score.Count >= 10)
+                    throw new GameRoomIsFullException();
+                if (_score.score.Count(x => x.playerName == playerName) > 0)
+                    throw new NameInUseException();
+
+                ScoreItemModel playerScore = new ScoreItemModel();
+                playerScore.playerName = playerName;
+                _score.score.Add(playerScore);
+                return GetScore();
+            }
+            catch (GameRoomIsFullException)
+            {
+                throw new GameRoomIsFullException();
+            }
+            catch(NameInUseException)
+            {
+                throw new NameInUseException();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public List<ScoreModel> GetScore()
+        public List<ScoreItemModel> AddPoint(string playerName)
         {
-            return _score;
+            _score.score.FirstOrDefault(x => x.playerName == playerName).score += 1;
+            return GetScore();
         }
 
-        public List<ScoreModel> AddPlayer(string playerName)
+        public List<ScoreItemModel> RemovePoint(string playerName)
         {
-            ScoreModel score = new ScoreModel();
-            score.playerName = playerName;
-            _score.Add(score);
-            return _score;
+            _score.score.FirstOrDefault(x => x.playerName == playerName).score -= 1;
+            return GetScore();
         }
 
-        public List<ScoreModel> AddPoint(string playerName)
+        public List<ScoreItemModel> RemovePlayer(string playerName)
         {
-            _score.FirstOrDefault(x => x.playerName == playerName).score += 1;
-            return _score;
-        }
-
-        public List<ScoreModel> RemovePoint(string playerName)
-        {
-            _score.FirstOrDefault(x => x.playerName == playerName).score -= 1;
-            return _score;
-        }
-
-        public List<ScoreModel> RemovePlayer(string playerName)
-        {
-            ScoreModel data = _score.FirstOrDefault(x => x.playerName == playerName);
-            _score.Remove(data);
-            return _score;
+            ScoreItemModel data = _score.score.FirstOrDefault(x => x.playerName == playerName);
+            _score.score.Remove(data);
+            return GetScore();
         }
     }
 

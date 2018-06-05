@@ -20,7 +20,9 @@ namespace SignalRMathGame
         {
             services.AddSignalR(x=>x.EnableDetailedErrors = true);
             services.AddSingleton<IMathProblem, MathProblem>();
-            services.AddTransient<IScore, Score>();
+            services.AddSingleton<IScore, Score>();
+            services.AddSingleton<ScoreModel, ScoreModel>();
+            services.AddTransient<ScoreItemModel, ScoreItemModel>();
         }        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

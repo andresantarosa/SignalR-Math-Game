@@ -3,30 +3,151 @@
 <head>
     <meta charset="utf-8" />
     <title></title>
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <link rel="stylesheet" href="game.css" />
 </head>
 <body>
-    <input type="button" id="btn" value="Enviar" />
-    <input type="button" id="refresh" value="Refresh" />
-    <script src="signalr.min.js"></script>
+
+    <div id="outer">
+        <div id="welcome" class="container">
+            <div class="row">
+                <div class="col-12">
+                    <center><h5>Welcome to math game!</h5></center>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-12">
+                    <input type="text" id="playerName" class="form-control" placeholder="Player name" />
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-12">
+                    <input type="button" id="enterGame" value="Play now!" class="btn btn-block btn-primary" />
+                </div>
+            </div>
+        </div>
+
+        <div id="game" class="game_area" style="display:none;">
+            <div class="row">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-12">
+                            <center>
+                                <h5>Math problem</h5>
+                            </center>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row mathChallengeArea">
+                        <div class="col-12">
+                            <center><h1 id="mathChallenge"></h1> = <h1 id="result"></h1></center>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-6">
+                            <input type="button" value="Correct" class="btn btn-block btn-success" id="isCorrect" />
+                        </div>
+                        <div class="col-6">
+                            <input type="button" value="Incorrect" class="btn btn-block btn-danger" id="isIncorrect" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-6">Player</div>
+                        <div class="col-4">Score</div>
+                    </div>
+                    <hr />
+                    <div id="score">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div style="display:none">
+        <input type="text" id="playerName" />
+        <input type="button" id="enterGame" value="Enter game" />
+        <span id="mathChallenge"></span>
+        <br />
+        <span id="result"></span>
+        <br />
+        <input type="button" id="isCorrect" value="Correct" />
+        <input type="button" id="isIncorrect" value="Wrong" />
+    </div>
+    <script src="js/signalr.min.js"></script>
     <script>
+
+        var playerName;
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/MathGame")
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
         connection.on("receiveMessage", data => {
-            console.log(data);
+            document.getElementById("mathChallenge").innerText = data.expression;
+            document.getElementById("result").innerText = data.possibleResult
         });
 
-        document.getElementById('btn').addEventListener("click", evt => {
-            connection.invoke("receiveMessage", "teste");
+        connection.on("receiveScore", data => {
 
+            let scoreContainer = document.getElementById("score");
+
+            while (scoreContainer.firstChild)
+                scoreContainer.removeChild(scoreContainer.firstChild);
+
+
+            for (i = 0; i < data.length; i++) {
+                console.log(data);
+                let row = document.createElement("div");
+                row.classList.add('row');
+
+
+                let colName = document.createElement("div");
+                colName.classList.add('col-8', 'playerName');
+                colName.innerText = data[i].playerName;
+                row.appendChild(colName);
+
+
+                let colScore = document.createElement("div");
+                colScore.classList.add('col-4', 'scoreValue');
+                colScore.innerText = data[i].score;
+                row.appendChild(colScore);
+
+                scoreContainer.appendChild(row);
+            }
+        });
+
+        connection.on("riseAlert", data => {
+            alert(data);
         })
 
-        document.getElementById('refresh').addEventListener("click", evt => {
-            connection.invoke("refreshChallenge");
-
+        connection.on("addedToGameRoom", data => {
+            document.getElementById('welcome').style.display = "none";
+            document.getElementById('game').style.display = "unset";
         })
+
+        /*********************************************/
+        document.getElementById("enterGame").addEventListener("click", evt => {            
+            playerName = document.getElementById("playerName").value
+            connection.invoke("enterGame", playerName);
+        });
+
+        document.getElementById("isCorrect").addEventListener("click", evt => {
+            connection.invoke("answerQuestion", {
+                "playerName": playerName, "isCorrect": true
+            })
+        });
+
+        document.getElementById("isIncorrect").addEventListener("click", evt => {
+            connection.invoke("answerQuestion", {
+                "playerName": playerName, "isCorrect": false
+            })
+        });
 
         connection.start().then(() => {
             console.log("Started connection");
@@ -34,6 +155,10 @@
             console.error(err.toString())
         });
 
+
+        window.onunload = function () {
+            connection.invoke("removeUser", playerName);
+        }
     </script>
 
 
