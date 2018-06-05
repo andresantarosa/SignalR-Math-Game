@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 //-------------------------
 using SignalRMathGame.Model;
 using SignalRMathGame.Exceptions;
+using System.Threading;
 
 namespace SignalRMathGame
 {
@@ -87,6 +88,7 @@ namespace SignalRMathGame
             if (_IMathProblem.GetPlayersInMatch().Count == 0)
             {
                 _IMathProblem.CreateProblem();
+                Thread.Sleep(5000);
                 await receiveMessage("teste");
             }
 
