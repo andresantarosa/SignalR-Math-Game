@@ -82,38 +82,47 @@
     <script src="js/signalr.min.js"></script>
     <script>
 
+        // Current player name
         var playerName;
+
+        // Create connection
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/MathGame")
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
+        // Get math challenge
         connection.on("receiveMessage", data => {
+            // Bind challenge
             document.getElementById("mathChallenge").innerText = data.expression;
+            // Bind possible result
             document.getElementById("result").innerText = data.possibleResult
+            // Enable response buttoons
             document.getElementById("isCorrect").removeAttribute("disabled");
             document.getElementById("isIncorrect").removeAttribute("disabled");
         });
 
+
+        // Receive and bind score
         connection.on("receiveScore", data => {
 
+            // Score container
             let scoreContainer = document.getElementById("score");
 
+            // Clear score panel
             while (scoreContainer.firstChild)
                 scoreContainer.removeChild(scoreContainer.firstChild);
 
-
+            // Bind score
             for (i = 0; i < data.length; i++) {
-                console.log(data);
+                
                 let row = document.createElement("div");
                 row.classList.add('row');
-
 
                 let colName = document.createElement("div");
                 colName.classList.add('col-8', 'playerName');
                 colName.innerText = data[i].playerName;
                 row.appendChild(colName);
-
 
                 let colScore = document.createElement("div");
                 colScore.classList.add('col-4', 'scoreValue');
@@ -124,44 +133,53 @@
             }
         });
 
+        // Rise alert
         connection.on("riseAlert", data => {
             alert(data);
         })
 
+        // Get status that the player was added to game room
         connection.on("addedToGameRoom", data => {
+            // Hide welcome screen
             document.getElementById('welcome').style.display = "none";
+            // Show game area
             document.getElementById('game').style.display = "unset";
         })
 
-        /*********************************************/
+        // Request the user to be added to game room
         document.getElementById("enterGame").addEventListener("click", evt => {            
             playerName = document.getElementById("playerName").value
             connection.invoke("enterGame", playerName);
         });
 
+        // Answer question as "Correct"
         document.getElementById("isCorrect").addEventListener("click", evt => {
             connection.invoke("answerQuestion", {
                 "playerName": playerName, "isCorrect": true
             })
+            // Disable response buttons
             disableButtons();
         });
 
+        // Answer question as "Incorrect"
         document.getElementById("isIncorrect").addEventListener("click", evt => {
             connection.invoke("answerQuestion", {
                 "playerName": playerName, "isCorrect": false
             })
+            // Disable response buttons
             disableButtons();
         });
 
+        // Disable response buttons
         function disableButtons() {
             document.getElementById("isCorrect").setAttribute("disabled", "disabled");
             document.getElementById("isIncorrect").setAttribute("disabled", "disabled");
         }
-
+        // Open connection
         connection.start().then(() => {
-            console.log("Started connection");
+            
         }).catch((err) => {
-            console.error(err.toString())
+            alert(err.toString())
         });
 
 

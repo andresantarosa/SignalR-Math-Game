@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 namespace SignalRMathGame.Model
 {
+    /// <summary>
+    /// Math challenge class model
+    /// </summary>
     public abstract class MathProblemModel
     {
         public string expression { get; set; }

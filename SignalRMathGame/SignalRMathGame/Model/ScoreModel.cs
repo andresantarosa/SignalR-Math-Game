@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace SignalRMathGame.Model
 {
+    /// <summary>
+    /// Score model
+    /// </summary>
     public class ScoreModel
     {
         public List<ScoreItemModel> score;

@@ -19,11 +19,20 @@ namespace SignalRMathGame.Logic
             _scoreItemModel = scoreItemModel;
         }
 
+        /// <summary>
+        /// Get current score
+        /// </summary>
+        /// <returns>Return current score</returns>
         public List<ScoreItemModel> GetScore()
         {
             return _score.score;
         }
 
+        /// <summary>
+        /// Add a new player to the score
+        /// </summary>
+        /// <param name="playerName"></param>
+        /// <returns>Return current score</returns>
         public List<ScoreItemModel> AddPlayer(string playerName)
         {
             try
@@ -52,18 +61,33 @@ namespace SignalRMathGame.Logic
             }
         }
 
+        /// <summary>
+        /// Add 1 point from player
+        /// </summary>
+        /// <param name="playerName"></param>
+        /// <returns>Return current score</returns>
         public List<ScoreItemModel> AddPoint(string playerName)
         {
             _score.score.FirstOrDefault(x => x.playerName == playerName).score += 1;
             return GetScore();
         }
 
+        /// <summary>
+        /// Remove 1 point from player
+        /// </summary>
+        /// <param name="playerName"></param>
+        /// <returns>Return current score</returns>
         public List<ScoreItemModel> RemovePoint(string playerName)
         {
             _score.score.FirstOrDefault(x => x.playerName == playerName).score -= 1;
             return GetScore();
         }
 
+        /// <summary>
+        /// Remove player from score
+        /// </summary>
+        /// <param name="playerName"></param>
+        /// <returns>Return current score</returns>
         public List<ScoreItemModel> RemovePlayer(string playerName)
         {
             ScoreItemModel data = _score.score.FirstOrDefault(x => x.playerName == playerName);

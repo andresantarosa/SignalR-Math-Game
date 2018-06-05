@@ -15,6 +15,7 @@ namespace SignalRMathGame.Logic
 
         private MathProblem _mathProblem { get; set; }
         private IScore _IScore;
+
         public MathProblem(IScore IScore)
         {
             _IScore = IScore;
@@ -23,11 +24,19 @@ namespace SignalRMathGame.Logic
 
         public MathProblem() { }
 
+        /// <summary>
+        /// Get current math challenge
+        /// </summary>
+        /// <returns>Return current math challenge</returns>
         public MathProblem GetMathProblem()
         {
             return _mathProblem;
         }
 
+        /// <summary>
+        /// Create new math challenge
+        /// </summary>
+        /// <returns>Return a new math challenge</returns>
         public MathProblem CreateProblem()
         {
             this.number1 = Randomize.GenerateRandomNumber();
@@ -42,6 +51,14 @@ namespace SignalRMathGame.Logic
             return this;
         }
 
+        /// <summary>
+        /// Calculate the result of an expression
+        /// </summary>
+        /// <param name="operation"></param>
+        /// <param name="number1"></param>
+        /// <param name="number2"></param>
+        /// <param name="matchResult">True: Result will be exact, False: Result can be differente of the real result</param>
+        /// <returns></returns>
         public float GetResult(OperationsEnum operation, int number1, int number2, bool matchResult)
         {
             switch (operation)
@@ -58,6 +75,11 @@ namespace SignalRMathGame.Logic
             return 0f;
         }
 
+        /// <summary>
+        /// Return the operation symbol based on OperationsEnum enumerator
+        /// </summary>
+        /// <param name="operation"></param>
+        /// <returns></returns>
         public string GetSymbol(OperationsEnum operation)
         {
             switch (operation)
@@ -74,26 +96,45 @@ namespace SignalRMathGame.Logic
             return "";
         }
 
+        /// <summary>
+        /// Check if the result is correct
+        /// </summary>
+        /// <returns></returns>
         public bool IsCorrect()
         {
             return this.result == this.possibleResult;
         }
 
+        /// <summary>
+        /// Set challenge as answered
+        /// </summary>
         public void setAnswered()
         {
             this.isAnswered = true;
         }
 
+        /// <summary>
+        /// Add new player to current match
+        /// </summary>
+        /// <param name="name"></param>
         public void AddPlayerToMatch(string name)
         {
             this.playersInMatch.Add(name);
         }
 
+        /// <summary>
+        /// Remove player from current match
+        /// </summary>
+        /// <param name="name"></param>
         public void removePlayerInMatch(string name)
         {
             this.playersInMatch.Remove(name);
         }
 
+        /// <summary>
+        /// Return a list of players in match
+        /// </summary>
+        /// <returns></returns>
         public List<string> GetPlayersInMatch()
         {
             return this.playersInMatch;
