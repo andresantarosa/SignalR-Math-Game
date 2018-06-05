@@ -6,13 +6,15 @@ Realtime math game based on signalR
 <br />
 To run this app 
 	<br />
-	1 - Install .NET Core 2.0 Runtime (v2.0.5) on https://www.microsoft.com/net/download/dotnet-core/runtime-2.0.5
+	1 - Install .NET Core 2.1 SDK on https://www.microsoft.com/net/download/dotnet-core/
 <br />
 	2 - Navigate into the application directory within terminal/CMD
 <br />
-	3 - Type dotnet run [Enter] - The solution will be compiled and a browser window will open
+	3 - Type dotnet restore[Enter] to restore the solution packages
+<br />	
+	4 - Type dotnet run [Enter] - The solution will be compiled and executed. On the command output an localhost:PORT will be shown
 <br />
-	4 - Add /index.html to the url path
+	5 - Paste the address in a browser window and add /index.html to the url path
 <br />
-	5 - Play!
+	6 - Play!
 <br />
