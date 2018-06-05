@@ -37,7 +37,7 @@ namespace SignalRMathGame
                 // Send the score to frontedn
                 await receiveScore();
                 // Get match challenge
-                await receiveMessage("teste");
+                await getChallenge();
             }
             catch (GameRoomIsFullException)
             {
@@ -62,9 +62,9 @@ namespace SignalRMathGame
         }
 
         // Send new math challenge
-        public async Task receiveMessage(string message)
+        public async Task getChallenge()
         {
-            await Clients.All.SendAsync("receiveMessage", _IMathProblem.GetMathProblem());
+            await Clients.All.SendAsync("getChallenge", _IMathProblem.GetMathProblem());
         }
 
         // Send score to front-end
@@ -77,7 +77,7 @@ namespace SignalRMathGame
         public async Task refreshChallenge()
         {
             _IMathProblem.CreateProblem();
-            await Clients.All.SendAsync("receiveMessage", _IMathProblem.GetMathProblem());
+            await Clients.All.SendAsync("getChallenge", _IMathProblem.GetMathProblem());
         }
 
         // Answer Question
@@ -94,12 +94,14 @@ namespace SignalRMathGame
                     _IScore.AddPoint(answer.playerName);
                     _IMathProblem.setAnswered();
                 }
+                await receiveScore();
                 await riseAlert("Correct!");
             }
             // If response is incorrect, remove -1 point of score of the player
             else
             {
                 _IScore.RemovePoint(answer.playerName);
+                await receiveScore();
                 await riseAlert("Wrong answer");
             }
             // Remove the player from the match
@@ -110,10 +112,10 @@ namespace SignalRMathGame
             {
                 _IMathProblem.CreateProblem();
                 Thread.Sleep(5000);
-                await receiveMessage("teste");
+                await getChallenge();
             }
 
-            await receiveScore();
+
         }
 
         // Rise alert on front-end

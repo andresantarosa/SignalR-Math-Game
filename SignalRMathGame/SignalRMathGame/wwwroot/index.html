@@ -92,7 +92,7 @@
             .build();
 
         // Get math challenge
-        connection.on("receiveMessage", data => {
+        connection.on("getChallenge", data => {
             // Bind challenge
             document.getElementById("mathChallenge").innerText = data.expression;
             // Bind possible result
@@ -182,7 +182,7 @@
             alert(err.toString())
         });
 
-
+        // On window close, request the player removel from hub
         window.onunload = function () {
             connection.invoke("removeUser", playerName);
         }
