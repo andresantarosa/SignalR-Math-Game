@@ -76,8 +76,8 @@
         <br />
         <span id="result"></span>
         <br />
-        <input type="button" id="isCorrect" value="Correct" />
-        <input type="button" id="isIncorrect" value="Wrong" />
+        <input type="button" id="isCorrect" value="Correct" disabled="disabled" />
+        <input type="button" id="isIncorrect" value="Wrong" disabled="disabled" />
     </div>
     <script src="js/signalr.min.js"></script>
     <script>
@@ -91,6 +91,8 @@
         connection.on("receiveMessage", data => {
             document.getElementById("mathChallenge").innerText = data.expression;
             document.getElementById("result").innerText = data.possibleResult
+            document.getElementById("isCorrect").removeAttribute("disabled");
+            document.getElementById("isIncorrect").removeAttribute("disabled");
         });
 
         connection.on("receiveScore", data => {
@@ -141,13 +143,20 @@
             connection.invoke("answerQuestion", {
                 "playerName": playerName, "isCorrect": true
             })
+            disableButtons();
         });
 
         document.getElementById("isIncorrect").addEventListener("click", evt => {
             connection.invoke("answerQuestion", {
                 "playerName": playerName, "isCorrect": false
             })
+            disableButtons();
         });
+
+        function disableButtons() {
+            document.getElementById("isCorrect").setAttribute("disabled", "disabled");
+            document.getElementById("isIncorrect").setAttribute("disabled", "disabled");
+        }
 
         connection.start().then(() => {
             console.log("Started connection");
