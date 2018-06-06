@@ -110,6 +110,7 @@ namespace SignalRMathGame
             // If there is no more players in match, wait 5 seconds then create a new challenge and send it to playerss
             if (_IMathProblem.GetPlayersInMatch().Count == 0)
             {
+                await riseAlert("This round is over, new round starts in 5 seconds");
                 _IMathProblem.CreateProblem();
                 Thread.Sleep(5000);
                 await getChallenge();
