@@ -12,7 +12,7 @@ To run this app
 <br />
 	3 - Type dotnet restore[Enter] to restore the solution packages
 <br />	
-	4 - Type dotnet run [Enter] - The solution will be compiled and executed. On the command output a http://localhost:PORT will be shown
+	4 - Type dotnet run [Enter] - The solution will be compiled and executed. On the command output an localhost:PORT will be shown
 <br />
 	5 - Paste the address in a browser window and add /index.html to the url path
 <br />

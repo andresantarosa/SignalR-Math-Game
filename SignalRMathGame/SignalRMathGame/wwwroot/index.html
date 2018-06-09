@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="game.css" />
 </head>
 <body>
-
     <div id="outer">
         <div id="welcome" class="container">
             <div class="row">
@@ -16,7 +15,7 @@
                 </div>
             </div>
             <br />
-            <div class="row">
+            <div class="row" id="buttonsContainer">
                 <div class="col-12">
                     <input type="text" id="playerName" class="form-control" placeholder="Player name" />
                 </div>
@@ -42,7 +41,7 @@
                     <br />
                     <div class="row mathChallengeArea">
                         <div class="col-12">
-                            <center><h1 id="mathChallenge"></h1> = <h1 id="result"></h1></center>
+                            <center><h1 id="mathChallenge"></h1></center>
                         </div>
                     </div>
                     <br />
@@ -67,6 +66,11 @@
 
             </div>
         </div>
+
+        <div class='fullscreenDiv' id="countdown" style="display:none">
+            <div class="center"><center><span>New game starts in </span><span id="countdownValue"></span></center></div>
+        </div>
+
     </div>
 
     <div style="display:none">
@@ -92,19 +96,21 @@
             .build();
 
         // Get math challenge
-        connection.on("getChallenge", data => {
+        connection.on("GetChallenge", data => {
             // Bind challenge
-            document.getElementById("mathChallenge").innerText = data.expression;
-            // Bind possible result
-            document.getElementById("result").innerText = data.possibleResult
+            document.getElementById("mathChallenge").innerText = data.expression + " = " + data.possibleResult;            
             // Enable response buttoons
             document.getElementById("isCorrect").removeAttribute("disabled");
             document.getElementById("isIncorrect").removeAttribute("disabled");
         });
 
+        connection.on("RiseAnswer", data => {
+            console.log(data);
+            document.getElementById("mathChallenge").innerText = data;    
+        })
 
         // Receive and bind score
-        connection.on("receiveScore", data => {
+        connection.on("ReceiveScore", data => {
 
             // Score container
             let scoreContainer = document.getElementById("score");
@@ -115,7 +121,7 @@
 
             // Bind score
             for (i = 0; i < data.length; i++) {
-                
+
                 let row = document.createElement("div");
                 row.classList.add('row');
 
@@ -134,12 +140,31 @@
         });
 
         // Rise alert
-        connection.on("riseAlert", data => {
+        connection.on("RiseAlert", data => {
             alert(data);
         })
 
+        // show countdown o new challenge and invoke a new one when its finished
+        connection.on("ChallengeFinished", data => {
+            let counter = 5;
+            document.getElementById("countdownValue").innerText = counter;
+            document.getElementById("countdown").style.display = "unset";
+
+            var interval = setInterval(function () {
+                document.getElementById("countdownValue").innerText = counter;
+
+                if (counter == 0) {
+                    document.getElementById("countdown").style.display = "none";                    
+                    clearInterval(interval);
+                    connection.invoke("RefreshChallenge");
+                }
+                counter--;
+            }, 1000);
+
+        })
+
         // Get status that the player was added to game room
-        connection.on("addedToGameRoom", data => {
+        connection.on("AddedToGameRoom", data => {
             // Hide welcome screen
             document.getElementById('welcome').style.display = "none";
             // Show game area
@@ -147,14 +172,14 @@
         })
 
         // Request the user to be added to game room
-        document.getElementById("enterGame").addEventListener("click", evt => {            
+        document.getElementById("enterGame").addEventListener("click", evt => {
             playerName = document.getElementById("playerName").value
-            connection.invoke("enterGame", playerName);
+            connection.invoke("EnterGame", playerName);
         });
 
         // Answer question as "Correct"
         document.getElementById("isCorrect").addEventListener("click", evt => {
-            connection.invoke("answerQuestion", {
+            connection.invoke("AnswerQuestion", {
                 "playerName": playerName, "isCorrect": true
             })
             // Disable response buttons
@@ -163,7 +188,7 @@
 
         // Answer question as "Incorrect"
         document.getElementById("isIncorrect").addEventListener("click", evt => {
-            connection.invoke("answerQuestion", {
+            connection.invoke("AnswerQuestion", {
                 "playerName": playerName, "isCorrect": false
             })
             // Disable response buttons
@@ -177,14 +202,14 @@
         }
         // Open connection
         connection.start().then(() => {
-            
+
         }).catch((err) => {
             alert(err.toString())
         });
 
         // On window close, request the player removel from hub
         window.onunload = function () {
-            connection.invoke("removeUser", playerName);
+            connection.invoke("RemoveUser", playerName);
         }
     </script>
 

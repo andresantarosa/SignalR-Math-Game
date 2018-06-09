@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <link rel="stylesheet" href="game.css" />
+</head>
+<body ng-app="mathGameApp" ng-controller="mathGameCtrl">
+    <div id="outer">
+
+        <div id="welcome" class="container" ng-show="welcomeIsVisible">
+            <div class="row">
+                <div class="col-12">
+                    <center><h5>Welcome to math game!</h5></center>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-12">
+                    <input type="text" id="playerName" ng-model="playerName" class="form-control" placeholder="Player name" />
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-12">
+                    <input type="button" id="enterGame" ng-click="enterGame(playerName)" value="Play now!" class="btn btn-block btn-primary" />
+                </div>
+            </div>
+        </div>
+
+        <div id="game" class="container" ng-show="gameAreaIsVisible">
+            <div class="row">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-12">
+                            <center>
+                                <h5>Math problem</h5>
+                            </center>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row mathChallengeArea">
+                        <div class="col-12">
+                            <center><h1 id="mathChallenge">{{expression}}</h1></center>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-6">
+                            <input type="button" value="Correct" ng-disabled="buttonIsDisabled" ng-click="answerQuestion(playerName, true)" class="btn btn-block btn-success" id="isCorrect" />
+                        </div>
+                        <div class="col-6">
+                            <input type="button" value="Incorrect" ng-disabled="buttonIsDisabled" ng-click="answerQuestion(playerName, false)" class="btn btn-block btn-danger" id="isIncorrect" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-6">Player</div>
+                        <div class="col-4">Score</div>
+                    </div>
+                    <hr />
+                    <div class="row" ng-repeat="item in score">
+                        <div class="col-6">{{item.playerName}}</div>
+                        <div class="col-4">{{item.score}}</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class='fullscreenDiv' id="countdown" ng-show="countdownIsVisible">
+            <div class="center"><center><span>New game starts in {{counter}}</span></center></div>
+        </div>
+    </div>
+
+    <div style="display:none">
+        <input type="text" id="playerName" />
+        <input type="button" id="enterGame" value="Enter game" />
+        <span id="mathChallenge"></span>
+        <br />
+        <span id="result"></span>
+        <br />
+        <input type="button" id="isCorrect" value="Correct" disabled="disabled" />
+        <input type="button" id="isIncorrect" value="Wrong" disabled="disabled" />
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.10/angular.min.js"></script>
+    <script src="js/signalr.min.js"></script>
+    <script>
+
+        angular.module("mathGameApp", []).controller("mathGameCtrl", function ($scope, $window) {
+            // Current player name
+            $scope.playerName;
+            $scope.welcomeIsVisible = true;
+            $scope.gameAreaIsVisible = false;
+            $scope.countdownIsVisible = false;
+
+            // Create connection
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/MathGame")
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            // Get math challenge
+            connection.on("GetChallenge", data => {
+                // Bind challenge
+                $scope.expression = data.expression + " = " + data.possibleResult;
+                $scope.$apply();
+            });
+
+            window.addEventListener("unload", function () {
+                connection.invoke("RemoveUser", $scope.playerName);
+            })
+            
+            // Receive and bind score
+            connection.on("ReceiveScore", data => {
+                $scope.score = data;
+                $scope.$apply();
+            });
+
+            // Rise alert
+            connection.on("RiseAlert", data => {
+                alert(data);
+            })
+
+            // Get status that the player was added to game room
+            connection.on("AddedToGameRoom", data => {
+                $scope.welcomeIsVisible = false;
+                $scope.gameAreaIsVisible = true;
+                $scope.$apply();
+            })
+
+            connection.on("ChallengeFinished", data => {
+                $scope.counter = 5;
+                $scope.countdownIsVisible = true;
+                $scope.$apply();
+
+                let interval = setInterval(function () {
+                    if ($scope.counter == 1) {
+                        $scope.countdownIsVisible = false;
+                        $scope.buttonIsDisabled = false;
+                        $scope.$apply();
+                        clearInterval(interval);
+                        connection.invoke("RefreshChallenge");
+                    }
+                    $scope.counter--;
+                    $scope.$apply();
+                }, 1000);
+
+            })
+
+            // rise answer Correct/Wrong
+            connection.on("RiseAnswer", data => {
+
+                $scope.buttonIsDisabled = true;
+                $scope.expression = data;
+                $scope.$apply();
+            })
+
+            // Request the user to be added to game room
+            $scope.enterGame = function (playerName) {
+                connection.invoke("EnterGame", playerName);
+            }
+
+
+            $scope.answerQuestion = function (playerName, answer) {
+                connection.invoke("AnswerQuestion", {
+                    "playerName": playerName, "isCorrect": answer
+                });
+            }
+
+
+            // Open connection
+            connection.start().then(() => {
+
+            }).catch((err) => {
+                alert(err.toString())
+            });
+           
+        })
+    </script>
+
+
+
+</body>
+</html>

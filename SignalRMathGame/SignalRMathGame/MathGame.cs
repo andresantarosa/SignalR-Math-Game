@@ -24,7 +24,7 @@ namespace SignalRMathGame
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public async Task enterGame(string name)
+        public async Task EnterGame(string name)
         {
             try
             {
@@ -33,57 +33,57 @@ namespace SignalRMathGame
                 // Add player to mach
                 _IMathProblem.AddPlayerToMatch(name);
                 // Communicate the frontend that the entrance was accepted
-                await addedToGameRoom();
+                await AddedToGameRoom();
                 // Send the score to frontedn
-                await receiveScore();
+                await ReceiveScore();
                 // Get match challenge
-                await getChallenge();
+                await GetChallenge();
             }
             catch (GameRoomIsFullException)
             {
                 // If the game room is full, an alert will be sent
-                await riseAlert("Gameroom is full");
+                await RiseAlert("Gameroom is full");
             }
             catch (NameInUseException)
             {
                 // If the player name is already in use, an alert will be sent
-                await riseAlert("The name is already in use, please choose another one");
+                await RiseAlert("The name is already in use, please choose another one");
             }
             catch (Exception ex)
             {
-                await riseAlert(ex.Message);
+                await RiseAlert(ex.Message);
             }
         }
 
         // Communicate the frontend that the entrance was accepted
-        public async Task addedToGameRoom()
+        public async Task AddedToGameRoom()
         {
-            await Clients.Caller.SendAsync("addedToGameRoom", "");
+            await Clients.Caller.SendAsync("AddedToGameRoom", "");
         }
 
         // Send new math challenge
-        public async Task getChallenge()
+        public async Task GetChallenge()
         {
-            await Clients.All.SendAsync("getChallenge", _IMathProblem.GetMathProblem());
+            await Clients.All.SendAsync("GetChallenge", _IMathProblem.GetMathProblem());
         }
 
         // Send score to front-end
-        public async Task receiveScore()
+        public async Task ReceiveScore()
         {
-            await Clients.All.SendAsync("receiveScore", _IScore.GetScore());
+            await Clients.All.SendAsync("ReceiveScore", _IScore.GetScore());
         }
 
         // Refresh challenge
-        public async Task refreshChallenge()
+        public async Task RefreshChallenge()
         {
             _IMathProblem.CreateProblem();
-            await Clients.All.SendAsync("getChallenge", _IMathProblem.GetMathProblem());
+            await GetChallenge();
         }
 
         // Answer Question
-        public async Task answerQuestion(AnswerModel answer)
+        public async Task AnswerQuestion(AnswerModel answer)
         {
-
+            bool isCorrect = false; ;
             // Check if response is correct
             if (_IMathProblem.IsCorrect() && answer.isCorrect || !_IMathProblem.IsCorrect() && !answer.isCorrect)
             {
@@ -94,44 +94,49 @@ namespace SignalRMathGame
                     _IScore.AddPoint(answer.playerName);
                     _IMathProblem.setAnswered();
                 }
-                await receiveScore();
-                await riseAlert("Correct!");
+                isCorrect = true;
             }
             // If response is incorrect, remove -1 point of score of the player
             else
             {
                 _IScore.RemovePoint(answer.playerName);
-                await receiveScore();
-                await riseAlert("Wrong answer");
+                isCorrect = false;
             }
             // Remove the player from the match
             _IMathProblem.removePlayerInMatch(answer.playerName);
 
+            
+
             // If there is no more players in match, wait 5 seconds then create a new challenge and send it to playerss
             if (_IMathProblem.GetPlayersInMatch().Count == 0)
             {
-                await riseAlert("This round is over, new round starts in 5 seconds");
-                _IMathProblem.CreateProblem();
-                Thread.Sleep(5000);
-                await getChallenge();
+                await ReceiveScore();
+                await Clients.Caller.SendAsync("RiseAnswer", isCorrect == true ? "Correct" : "Wrong answer");
+                await Clients.All.SendAsync("ChallengeFinished");
             }
+            else
+            {
+                await ReceiveScore();
+                await Clients.Caller.SendAsync("RiseAnswer", isCorrect == true ? "Correct" : "Wrong answer");
+            }
+            
 
 
         }
 
-        // Rise alert on front-end
-        public async Task riseAlert(string message)
+             // Rise alert on front-end
+        public async Task RiseAlert(string message)
         {
-            await Clients.Caller.SendAsync("riseAlert", message);
+            await Clients.Caller.SendAsync("RiseAlert", message);
         }
 
         // Remove user from match an from score
         // Used when a User is disconnected from the HUb
-        public async Task removeUser(string name)
+        public async Task RemoveUser(string name)
         {
             _IScore.RemovePlayer(name);
             _IMathProblem.removePlayerInMatch(name);
-            await receiveScore();
+            await ReceiveScore();
         }
     }
 }

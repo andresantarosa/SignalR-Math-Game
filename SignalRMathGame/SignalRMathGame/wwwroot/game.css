@@ -47,3 +47,22 @@ body {
     background-color:#e4e1e1;
 
 }
+ .fullscreenDiv {
+    background-color: rgba(232,232,232,0.7);
+    width: 100%;
+    height: auto;
+    bottom: 0px;
+    top: 0px;
+    left: 0;
+    position: absolute;
+}
+
+.center {
+    width: 100%;
+    max-width: 500px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+    font-size: 60px;
+}
